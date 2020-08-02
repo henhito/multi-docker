@@ -1,0 +1,28 @@
+sudo: require
+services:
+ - docker
+
+before_install:
+ - docker build -t henhito/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+ - docker run henhito/react-test npm test -- --coverage
+
+after_sucess:
+ - docker build -t henhito/multi-client ./client
+ - docker build -t henhito/multi-enginx ./nginx
+ - docker build -t henhito/multi-server ./server
+ - docker build -t henhito/multi-worker ./worker
+  #Log in to docker
+
+ - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-s
+
+  #Push images to docker
+
+ - docker push henhito/multi-client ./client
+ - docker push henhito/multi-enginx ./nginx
+ - docker push henhito/multi-server ./server
+ - docker push henhito/multi-worker ./worker
+
+
+
